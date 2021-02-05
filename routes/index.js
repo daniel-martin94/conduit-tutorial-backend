@@ -1,5 +1,10 @@
+/*
+This is a general router for the api. Redirects /api/{routes} to
+proper routes
+*/
+
 var router = require('express').Router();
 
-router.use('/api', require('./api'));
+router.use('/', require('./api'));
 
 module.exports = router;

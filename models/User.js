@@ -21,11 +21,22 @@ var UserSchema = new mongoose.Schema({
         match: [/\S+@\S+\.\S+/, 'is invalid'], 
         index: true
     },
-    bio: String,
     image: String,
+    firstName: String,
+    lastName: String,
+    primaryPhoneNumber: {
+        type: String, 
+        unique: true,
+        required: [true, "Can't be blank"], 
+    },
+    address: {
+        StreetAddress: String,
+        cityTown: String, 
+        state: String,
+        zipcode: String,
+        country: String
+    },
     hash: String,
-    favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
-    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     salt: String
 }, {timestamps: true, usePushEach: true});
 
@@ -57,7 +68,18 @@ UserSchema.methods.toAuthJSON = function(){
         username: this.username,
         email: this.email,
         token: this.generateJWT(),
-        bio: this.bio,
+        image: this.image
+    };
+};
+
+UserSchema.methods.toProfileJSON = function(){
+    return {
+        username: this.username,
+        email: this.email,
+        firstName: this.firstName,
+        lastName: this.lastName,
+        primaryPhoneNumber: this.primaryPhoneNumber,
+        address: this.address,
         image: this.image
     };
 };
@@ -71,41 +93,5 @@ UserSchema.methods.toProfileJSONFor = function(user){
     };
   };
 
-UserSchema.methods.favorite = function(id){
-    if(this.favorites.indexOf(id) === -1){
-      this.favorites.push(id);
-    }
-    return this.save();
-  };
-
-UserSchema.methods.unfavorite = function(id){
-    this.favorites.remove( id );
-    return this.save();
-  };
-
-UserSchema.methods.isFavorite = function (id) {
-    return this.favorites.some(function (favoriteId) {
-        return favoriteId.toString() === id.toString();
-    });
-};
-
-UserSchema.methods.follow = function(id){
-    if(this.following.indexOf(id) === -1){
-      this.following.push(id);
-    }
-  
-    return this.save();
-  };
-
-UserSchema.methods.unfollow = function (id) {
-    this.following.remove(id);
-    return this.save();
-};
-
-UserSchema.methods.isFollowing = function (id) {
-    return this.following.some(function (followId) {
-        return followId.toString() === id.toString();
-    });
-};
 
 mongoose.model('User', UserSchema);
